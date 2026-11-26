@@ -321,7 +321,7 @@ async def test_set_avatar_rejects_empty():
 
 # ---------------------------------------------------------------- 临时会话 & 动态白名单
 async def test_temp_session_from_stranger_is_accepted():
-    channel = make_channel(users="1647872249", groups="456")
+    channel = make_channel(users="1000000001", groups="456")
     await channel.handle_message(
         event(user_id=555, nickname="路人", sub_type="group", group_id=789)
     )
@@ -336,14 +336,14 @@ async def test_temp_session_from_stranger_is_accepted():
 
 
 async def test_plain_stranger_without_temp_session_is_ignored():
-    channel = make_channel(users="1647872249", groups="456")
+    channel = make_channel(users="1000000001", groups="456")
     await channel.handle_message(event(user_id=555, message_id=2))
     assert channel.server.sent == []
     assert channel.stats["ignored"] == 1
 
 
 async def test_dynamic_whitelist_allow_and_remove():
-    channel = make_channel(users="1647872249", groups="456")
+    channel = make_channel(users="1000000001", groups="456")
     await channel.handle_message(event(user_id=555, message_id=3))
     assert channel.server.sent == []
 
@@ -357,14 +357,14 @@ async def test_dynamic_whitelist_allow_and_remove():
 
 
 async def test_owner_cannot_be_removed():
-    channel = make_channel(users="1647872249", groups="456")
-    assert channel.contacts.owner == 1647872249
+    channel = make_channel(users="1000000001", groups="456")
+    assert channel.contacts.owner == 1000000001
     with pytest.raises(ValueError):
-        channel.contacts.disallow(1647872249)
+        channel.contacts.disallow(1000000001)
 
 
 async def test_temp_session_can_be_disabled():
-    channel = make_channel(users="1647872249", groups="456")
+    channel = make_channel(users="1000000001", groups="456")
     channel.settings = channel.settings.model_copy(update={"qq_accept_temp_sessions": False})
     await channel.handle_message(event(user_id=555, sub_type="group", group_id=789, message_id=6))
     assert channel.server.sent == []

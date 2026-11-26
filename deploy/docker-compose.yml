@@ -77,8 +77,8 @@ services:
       QT_QPA_PLATFORM: offscreen
       # 快速登录：带上 QQ 号，容器重启后自动用本地登录态登录，不再要二维码
       # （entrypoint 会执行 qq --no-sandbox -q "$ACCOUNT"）
-      ACCOUNT: ${NAPCAT_QQ:-3516517871}
-      NAPCAT_QQ: ${NAPCAT_QQ:-3516517871}
+      ACCOUNT: ${NAPCAT_QQ:-1000000002}
+      NAPCAT_QQ: ${NAPCAT_QQ:-1000000002}
     volumes:
       - ./data/napcat/QQ:/app/.config/QQ
       - ./data/napcat/config:/app/napcat/config

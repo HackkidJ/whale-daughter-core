@@ -493,7 +493,7 @@ DSDaughter/
 - **长期记忆（P2a）**：Postgres + pgvector 四表（messages / memories / relations / episodes）；后台事实抽取、时间衰减 + 词面/向量混合检索、命中记忆注入 system；进程重启后仍记得（已实测：删掉原始对话只留 memories，她仍答得出"吉他和 F 和弦"）
 - 工程化：`scripts/archive-napcat.sh`（镜像+登录态存档）、`scripts/fake-napcat.py`（不登录 QQ 也能联调）
 - 容器：Dockerfile（多阶段、非 root、只读根、healthcheck）+ compose（profiles: prod/qq/data）+ Caddyfile（屏蔽 `/onebot/*`）
-- 验证：245 个测试通过；ruff 全绿；本机 CLI、Web、SSE、「模拟镜像内非 editable 安装后启动」、**假 NapCat → 真实 DeepSeek → 回发 QQ 消息**，以及**真机 QQ（机器人 3516517871 ↔ 个人号 1647872249）端到端收发**均实测通过
+- 验证：245 个测试通过；ruff 全绿；本机 CLI、Web、SSE、「模拟镜像内非 editable 安装后启动」、**假 NapCat → 真实 DeepSeek → 回发 QQ 消息**，以及**真机 QQ（机器人 1000000002 ↔ 个人号 1000000001）端到端收发**均实测通过
 
 **下一步**
 

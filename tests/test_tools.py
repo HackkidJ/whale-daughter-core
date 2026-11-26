@@ -14,20 +14,20 @@ from dsdaughter.tools import ToolContext, ToolRegistry, build_default_registry
 
 class StubServer:
     connected = True
-    self_id = 3516517871
+    self_id = 1000000002
 
     def __init__(self) -> None:
         self.calls: list[tuple[str, dict]] = []
 
     async def call(self, action: str, params: dict) -> dict:
         if action == "get_login_info":
-            stale = {"nickname": "暮色香草", "user_id": 3516517871}
+            stale = {"nickname": "暮色香草", "user_id": 1000000002}
             return {"status": "ok", "retcode": 0, "data": stale}
         if action == "get_stranger_info":
             fresh = {
                 "nickname": "鱼鱼",
                 "long_nick": "今天也想唱给你听。",
-                "user_id": 3516517871,
+                "user_id": 1000000002,
             }
             return {"status": "ok", "retcode": 0, "data": fresh}
         self.calls.append((action, params))

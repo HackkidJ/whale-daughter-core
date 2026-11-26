@@ -17,8 +17,8 @@ from dsdaughter.tools import contacts as tools
 def make_settings(tmp_path: Path, **overrides) -> Settings:
     base = {
         "data_dir": tmp_path,
-        "owner_qq": "1647872249",
-        "qq_allowed_users": "1647872249",
+        "owner_qq": "1000000001",
+        "qq_allowed_users": "1000000001",
         "memory_extract": False,
     }
     base.update(overrides)
@@ -27,7 +27,7 @@ def make_settings(tmp_path: Path, **overrides) -> Settings:
 
 class FakeServer:
     connected = True
-    self_id = 3516517871
+    self_id = 1000000002
 
     def __init__(
         self, unsupported: set[str] | None = None, friends: set[int] | None = None
@@ -68,8 +68,8 @@ def make_ctx(tmp_path: Path) -> tuple[ToolContext, FakeChannel]:
 def test_store_persists_and_protects_owner(tmp_path):
     settings = make_settings(tmp_path)
     store = ContactStore(settings)
-    assert store.owner == 1647872249
-    assert store.is_allowed(1647872249)
+    assert store.owner == 1000000001
+    assert store.is_allowed(1000000001)
 
     store.allow(555, note="群友")
     store.remember_temp(777, 789)
@@ -80,7 +80,7 @@ def test_store_persists_and_protects_owner(tmp_path):
     assert reloaded.temp_group(777) == 789
 
     with pytest.raises(ValueError):
-        reloaded.disallow(1647872249)
+        reloaded.disallow(1000000001)
 
 
 def test_family_recipients_persist(tmp_path):
@@ -98,8 +98,8 @@ def test_contacts_file_shape(tmp_path):
     store = ContactStore(settings)
     store.allow(555)
     payload = json.loads((tmp_path / "contacts.json").read_text(encoding="utf-8"))
-    assert payload["owner"] == 1647872249
-    assert {item["user_id"] for item in payload["contacts"]} == {1647872249, 555}
+    assert payload["owner"] == 1000000001
+    assert {item["user_id"] for item in payload["contacts"]} == {1000000001, 555}
 
 
 # --------------------------------------------------------------------- 工具
@@ -108,7 +108,7 @@ async def test_list_contacts(tmp_path):
     channel.contacts.allow(555, note="群友")
     result = await tools.list_contacts(ctx)
     assert result.ok
-    assert "1647872249" in result.content
+    assert "1000000001" in result.content
     assert "555" in result.content
     assert "群友" in result.content
 
@@ -124,7 +124,7 @@ async def test_allow_and_remove_contact(tmp_path):
     assert not channel.contacts.is_allowed(888)
 
     with pytest.raises(ToolError):
-        await tools.remove_contact(ctx, user_id=1647872249)
+        await tools.remove_contact(ctx, user_id=1000000001)
 
 
 async def test_delete_friend_calls_qq_and_removes_from_contacts(tmp_path):
@@ -141,7 +141,7 @@ async def test_delete_friend_calls_qq_and_removes_from_contacts(tmp_path):
 async def test_delete_friend_protects_owner(tmp_path):
     ctx, _ = make_ctx(tmp_path)
     with pytest.raises(ToolError):
-        await tools.delete_friend(ctx, user_id=1647872249)
+        await tools.delete_friend(ctx, user_id=1000000001)
 
 
 async def test_approve_friend_request(tmp_path):

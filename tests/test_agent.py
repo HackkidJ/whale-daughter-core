@@ -155,17 +155,17 @@ async def test_broken_persona_edit_keeps_old_version(tmp_path):
 # ---------------------------------------------------------------- 工具调用循环
 class _StubQqServer:
     connected = True
-    self_id = 3516517871
+    self_id = 1000000002
 
     def __init__(self) -> None:
         self.calls: list[tuple[str, dict]] = []
 
     async def call(self, action: str, params: dict) -> dict:
         if action == "get_login_info":
-            payload = {"nickname": "暮色香草", "user_id": 3516517871}
+            payload = {"nickname": "暮色香草", "user_id": 1000000002}
             return {"status": "ok", "retcode": 0, "data": payload}
         if action == "get_stranger_info":
-            payload = {"nickname": "鱼鱼", "long_nick": "今天也想唱给你听。", "user_id": 3516517871}
+            payload = {"nickname": "鱼鱼", "long_nick": "今天也想唱给你听。", "user_id": 1000000002}
             return {"status": "ok", "retcode": 0, "data": payload}
         self.calls.append((action, params))
         return {"status": "ok", "retcode": 0, "data": {}}
