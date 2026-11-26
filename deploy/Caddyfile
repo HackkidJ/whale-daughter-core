@@ -1,0 +1,22 @@
+# 生产入口（profile: prod）。把 localhost 换成你的域名，并把域名解析到服务器。
+# 本地开发不需要它：bot 直接暴露在 127.0.0.1:8000。
+#
+# 上线前务必加一层访问保护：
+#   caddy hash-password        # 生成密码 hash
+#   basic_auth { me <hash> }   # 填到下面的 basic_auth 里
+{$SITE_ADDRESS:localhost} {
+	encode zstd gzip
+
+	# 反向 WS 只给本机 NapCat 用，绝不对公网开放
+	@onebot path /onebot/*
+	respond @onebot 403
+
+	# 公网暴露 Web 聊天页时强烈建议打开（含 SSE，Caddy 默认不缓冲）
+	# basic_auth {
+	#	me REPLACE_WITH_BCRYPT_HASH
+	# }
+
+	reverse_proxy bot:8000 {
+		flush_interval -1
+	}
+}

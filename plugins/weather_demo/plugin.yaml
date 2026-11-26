@@ -1,0 +1,8 @@
+name: weather_demo
+version: 0.1.0
+description: 天气查询示例插件（Open-Meteo，免费无需 API Key）
+author: DSDaughter
+enabled: true
+# 需要的权限：network=允许联网；qq=允许调 OneBot 接口；filesystem=读写文件（高危，需白名单）
+permissions:
+  - network

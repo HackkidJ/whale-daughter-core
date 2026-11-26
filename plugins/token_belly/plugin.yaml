@@ -1,0 +1,12 @@
+name: token_belly
+version: 0.2.0
+description: 让她"看得见自己的肚子"：余额、还能吃几天、饿不饿；余额耗尽等于消失
+author: DSDaughter
+enabled: true
+permissions:
+  - network
+options:
+  # 兜底饭量（元/天）：采样不足时用它估算"还能吃几天"
+  daily_cost: 1.5
+  # 余额缓存秒数：每轮都查 API 太浪费，默认 3 分钟刷一次
+  refresh_seconds: 180

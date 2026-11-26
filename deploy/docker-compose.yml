@@ -1,0 +1,126 @@
+# 赛博女儿 · 本地/单机部署
+#
+#   docker compose up -d --build            # 只起 bot（默认，开发够用）
+#   docker compose --profile prod up -d    # 额外起 Caddy（域名 + HTTPS）
+#   docker compose --profile data up -d    # P1：起 Postgres + Redis
+#
+# 环境变量从仓库根目录的 .env 读取（cp ../.env.example ../.env）。
+
+name: dsdaughter
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  bot:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: dsdaughter:dev
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      DSD_HOST: 0.0.0.0
+      DSD_PORT: "8000"
+    ports:
+      - "127.0.0.1:8000:8000"   # 只监听本机；公网入口走 Caddy / SSH 隧道
+    volumes:
+      # 只读挂载：改插件/文档不用重建镜像，热加载直接生效
+      - ../plugins:/app/plugins:ro
+      - ../docs:/app/docs:ro
+      - ../data:/app/data
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    logging: *default-logging
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["prod"]
+    environment:
+      # 域名（需先解析到本机）；不设则回落到 localhost
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - bot
+    restart: unless-stopped
+    logging: *default-logging
+
+  # ---- P1：QQ 通道（NapCat）----
+  # 仓库已删，只能锁死 v4.18.42；首次部署先跑 scripts/archive-napcat.sh 存档镜像与登录态。
+  # 注意：network_mode host 在 Linux 上正常；macOS 的 Docker Desktop 对 host 网络支持有限，
+  # 本机开发建议直接跑 NapCat 官方 macOS 版，把反向 WS 指向 ws://127.0.0.1:8000/onebot/v11/ws
+  napcat:
+    image: mlikiowa/napcat-docker:v4.18.42
+    profiles: ["qq"]
+    container_name: dsdaughter-napcat
+    network_mode: host
+    environment:
+      NAPCAT_UID: ${NAPCAT_UID:-1000}
+      NAPCAT_GID: ${NAPCAT_GID:-1000}
+      QT_QPA_PLATFORM: offscreen
+      # 快速登录：带上 QQ 号，容器重启后自动用本地登录态登录，不再要二维码
+      # （entrypoint 会执行 qq --no-sandbox -q "$ACCOUNT"）
+      ACCOUNT: ${NAPCAT_QQ:-3516517871}
+      NAPCAT_QQ: ${NAPCAT_QQ:-3516517871}
+    volumes:
+      - ./data/napcat/QQ:/app/.config/QQ
+      - ./data/napcat/config:/app/napcat/config
+    restart: unless-stopped
+    logging: *default-logging
+
+  # ---- P1：记忆层接通后再启用（profile: data）----
+  postgres:
+    image: pgvector/pgvector:pg16
+    profiles: ["data"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dsd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-dsd}
+    ports:
+      - "127.0.0.1:5433:5432"   # 宿主机跑 bot 时连它；bot 在 compose 里就用 postgres:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dsd}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["data"]
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}
+  pgdata: {}
+  redisdata: {}
